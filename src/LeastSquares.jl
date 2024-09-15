@@ -256,6 +256,38 @@ where A is a solution to the following least-squares problem
 - `report::LSreport`
 """
 function leastSquares(
+    lsData::LSdata{FloatLS,IntLS};
+    timerOutput=nothing,
+    verbose=false,
+    kwargs...
+)::Tuple{Matrix{FloatLS},LSreport} where {FloatLS,IntLS}
+
+    ownTimer::Bool = isnothing(timerOutput)
+    if isnothing(timerOutput)
+        timerOutput = TimerOutput()
+    end
+    t0 = Base.time_ns()
+
+    @timeit timerOutput "compress!" compress!(lsData)
+    K::IntLS = lsData.KK
+
+    @timeit timerOutput "XXK" XXK = lsData.XX / K
+    @timeit timerOutput "YXK" YXK = lsData.YX / K
+    @timeit timerOutput "YYK" YYK = lsData.YY / K
+
+    rc = leastSquares(XXK, YXK, YYK, K; timerOutput, verbose, kwargs...)
+
+    dt = 1e-9 * (Base.time_ns() - t0)
+    if verbose || (dt > 1.0 && ownTimer)
+        #TimerOutputs.complement!(timerOutput) # add missing times
+        show(timerOutput, sortby=:firstexec, compact=true)
+        println()
+    end
+
+    return rc
+end
+
+function leastSquares(
     X::Matrix{FloatLS},
     Y::Matrix{FloatLS};
     timerOutput=nothing,
@@ -268,7 +300,6 @@ function leastSquares(
     if isnothing(timerOutput)
         timerOutput = TimerOutput()
     end
-
     t0 = Base.time_ns()
 
     (nX, K) = size(X)

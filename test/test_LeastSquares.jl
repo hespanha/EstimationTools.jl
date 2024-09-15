@@ -13,7 +13,7 @@ using Statistics
 
 using EstimationTools
 
-@testset "testKleastSquares: test least squares without regularization" begin
+@testset "test leastSquares: test least squares without regularization" begin
     # identity X, square
     X = [1.0 0.0; 0.0 1.0]
     A = 2.0Matrix{Float64}(I, 2, 2)
@@ -38,7 +38,7 @@ using EstimationTools
     @test hatAA ≈ A
 end
 
-@testset "testKleastSquares: test least squares with regularization" begin
+@testset "test leastSquares: test least squares with regularization" begin
     # identity X, square
     X = [1.0 0.0; 0.0 1.0]
     A = 2.0Matrix{Float64}(I, 2, 2)
@@ -47,13 +47,32 @@ end
     @test norm(hatA) < 1e-5
 end
 
+@testset "test leastSquares: using LSdata" begin
+    # identity X, square
+    X = [1.0 0.0; 0.0 1.0]
+    A = 2.0Matrix{Float64}(I, 2, 2)
+    Y = A * X
+
+    nX = size(X, 1)
+    nY = size(Y, 1)
+    Kcache = 100
+    lsd = LSdata{Float64,Int64}(nX, nY, Kcache)
+    for i in 1:size(X, 2)
+        push!(lsd, X[:, i], Y[:, i])
+    end
+    (hatA, report) = leastSquares(lsd; verbose=true, lambda=0.0)
+    @test hatA ≈ A
+end
+
+
+## Test speed and allocations of LSdata
 
 function baseline(lsd::LSdata{Float64,Int64}, X::Matrix{Float64}, Y::Matrix{Float64})
     mul!(lsd.XX, X, X')
     mul!(lsd.YX, Y, X')
     mul!(lsd.YY, Y, Y')
 end
-function lsdata(lsd::LSdata{Float64,Int64}, X::Matrix{Float64}, Y::Matrix{Float64})
+function lsData(lsd::LSdata{Float64,Int64}, X::Matrix{Float64}, Y::Matrix{Float64})
     reset!(lsd)
     for k in axes(X, 2)
         x = @view X[:, k]
@@ -83,7 +102,7 @@ function test1()
         Y = rand(Float64, nY, K)
 
         # check correctness
-        lsdata(lsd, X, Y)
+        lsData(lsd, X, Y)
         if K <= size(lsd.X, 2)
             @test lsd.X[:, 1:K] == X
             @test lsd.Y[:, 1:K] == Y
@@ -95,7 +114,7 @@ function test1()
         # Get base line times
         b0 = @benchmark baseline($lsd, $X, $Y)
         # check time
-        b1 = @benchmark lsdata($lsd, $X, $Y)
+        b1 = @benchmark lsData($lsd, $X, $Y)
         @printf("   time slowdown up=%g, allocs=%d memory=%d\n",
             Statistics.mean(b1.times) / Statistics.mean(b0.times), b1.memory, b1.allocs)
 
@@ -104,4 +123,4 @@ function test1()
     end
 end
 
-@testset "testKleastSquares: LSdata" test1()
+@testset "test LSdata: speed and allocations" test1()
