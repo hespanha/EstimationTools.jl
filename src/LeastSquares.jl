@@ -231,6 +231,10 @@ end
 """
     A=leastSquares(X::Matrix{FloatLS},Y::Matrix{FloatLS};lambda::FloatLS=convert(FloatLS,0.0))
 
+or
+
+    A=leastSquares(lsData:LSdata{FloatLS,IntLS};lambda::FloatLS=convert(FloatLS,0.0))
+
 Estimates the matrix A in the model
     y_k = A x_k + noise    k in 1:K
 where A is a solution to the following least-squares problem
@@ -256,43 +260,10 @@ where A is a solution to the following least-squares problem
 - `report::LSreport`
 """
 function leastSquares(
-    lsData::LSdata{FloatLS,IntLS};
-    timerOutput=nothing,
-    verbose=false,
-    kwargs...
-)::Tuple{Matrix{FloatLS},LSreport} where {FloatLS,IntLS}
-
-    ownTimer::Bool = isnothing(timerOutput)
-    if isnothing(timerOutput)
-        timerOutput = TimerOutput()
-    end
-    t0 = Base.time_ns()
-
-    @timeit timerOutput "compress!" compress!(lsData)
-    K::IntLS = lsData.KK
-
-    @timeit timerOutput "XXK" XXK = lsData.XX / K
-    @timeit timerOutput "YXK" YXK = lsData.YX / K
-    @timeit timerOutput "YYK" YYK = lsData.YY / K
-
-    rc = leastSquares(XXK, YXK, YYK, K; timerOutput, verbose, kwargs...)
-
-    dt = 1e-9 * (Base.time_ns() - t0)
-    if verbose || (dt > 1.0 && ownTimer)
-        #TimerOutputs.complement!(timerOutput) # add missing times
-        show(timerOutput, sortby=:firstexec, compact=true)
-        println()
-    end
-
-    return rc
-end
-
-function leastSquares(
     X::Matrix{FloatLS},
     Y::Matrix{FloatLS};
     timerOutput=nothing,
     verbose=false,
-    useSSD::Bool=false,
     kwargs...
 )::Tuple{Matrix{FloatLS},LSreport} where {FloatLS}
 
@@ -323,7 +294,7 @@ function leastSquares(
     return rc
 end
 
-# TODO: not really used, but ony works when nX==nY
+# TODO: not really used, and only works when nX==nY
 function SSD(
     X::Matrix{FloatLS},
     Y::Matrix{FloatLS};
@@ -367,6 +338,42 @@ function SSD(
 end
 
 """
+Input from LSdata
+"""
+function leastSquares(
+    lsData::LSdata{FloatLS,IntLS};
+    timerOutput=nothing,
+    verbose=false,
+    kwargs...
+)::Tuple{Matrix{FloatLS},LSreport} where {FloatLS,IntLS}
+
+    ownTimer::Bool = isnothing(timerOutput)
+    if isnothing(timerOutput)
+        timerOutput = TimerOutput()
+    end
+    t0 = Base.time_ns()
+
+    @timeit timerOutput "compress!" compress!(lsData)
+    K::IntLS = lsData.KK
+
+    @timeit timerOutput "XXK" XXK = lsData.XX / K
+    @timeit timerOutput "YXK" YXK = lsData.YX / K
+    @timeit timerOutput "YYK" YYK = lsData.YY / K
+
+    rc = leastSquares(XXK, YXK, YYK, K; timerOutput, verbose, kwargs...)
+
+    dt = 1e-9 * (Base.time_ns() - t0)
+    if verbose || (dt > 1.0 && ownTimer)
+        #TimerOutputs.complement!(timerOutput) # add missing times
+        show(timerOutput, sortby=:firstexec, compact=true)
+        println()
+    end
+
+    return rc
+end
+
+"""
+Input:
     YYK = Y * Y' / K
     XXK = (X * X') / K
     YXK = (Y * X') / K
