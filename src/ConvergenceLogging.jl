@@ -7,7 +7,33 @@ using ElasticArrays
 using Plots
 
 """
-Structure to store convergence data for plotting.
+Structure used to store convergence data for plotting.
+
+    logger=TimeSeriesLogger{T,D}(N; maxPoints,xlabel,ylabel,legend,ylimits)
+
+# Fields:
++ `time::ElasticVector{T}`: time vector
++ `data::ElasticMatrix{D}`: matrix with data to plot, with one time instant per column and one time
+        series per row
++ `maxPoints::Int`: maximum number of points to plot. When the number of time instants is larger
+        than this value, multiple time instants are "aggregates" and represented by their mean, min,
+        and max values.
++ `xlabel::String="time"`: label for the x axis
++ `ylabel::String="data"`: label for the y axis
++ `legend::Vector{String}=string.(1:N)`: legend for the different time series
++ `ylimits::Vector{Float64}=[-NaN64, NaN64]`: limits for the y axis
+
+# Constructor parameters:
++ `T::Type`: type of the time variable
++ `D::Type`: type of the data variables
++ `N::Int`: number of time series
++ `maxPoints::Int`: maximum number of points to plot. When the number of time instants is larger
+        than this value, multiple time instants are "aggregates" and represented by their mean, min,
+        and max values.
++ `xlabel::String="time"`: label for the x axis
++ `ylabel::String="data"`: label for the y axis
++ `legend::Vector{String}=string.(1:N)`: legend for the different time series
++ `ylimits::Vector{Float64}=[-NaN64, NaN64]`: limits for the y axis
 """
 struct TimeSeriesLogger{T,D}
     time::ElasticVector{T}
@@ -17,13 +43,13 @@ struct TimeSeriesLogger{T,D}
     ylabel::String
     legend::Vector{String}
     ylimits::Vector{Float64}
-    function TimeSeriesLogger{T,D}(N::Int;
+    function TimeSeriesLogger{T,D}(
+        N::Int;
         maxPoints::Int=200,
         xlabel::String="time",
         ylabel::String="data",
         legend::Vector{String}=string.(1:N),
         ylimits::Vector{Float64}=[-NaN64, NaN64],
-        #ylimits::Vector{Float64}=[-1.0, 1.0],
     ) where {T,D}
         time::ElasticVector{T} = ElasticVector{T}(undef, 0)
         data::ElasticMatrix{D} = ElasticMatrix{D}(undef, N, 0)
@@ -32,59 +58,83 @@ struct TimeSeriesLogger{T,D}
     end
 end
 
+"""
+Add one data point to the logger.
+
+# Parameters:
++ `logger::TimeSeriesLogger{T,D}`: logger
++ `t::T`: time 
++ `d::AbstractVector{D}`: values
+"""
 function Base.append!(
-    clog::TimeSeriesLogger{T,D},
+    logger::TimeSeriesLogger{T,D},
     t::T,
     d::AbstractVector{D},
 ) where {T,D}
-    append!(clog.time, t)
-    append!(clog.data, d)
+    append!(logger.time, t)
+    append!(logger.data, d)
+    return nothing
 end
 
-"""Plot array of loggers, at each subplot."""
+"""
+Plot array of loggers, each in one subplot of a given plot.
+
+# Parameters:
++ `plt::Union{Plots.Plot,Plots.Subplot}`: Plot, typically with multiple subplots
++ 'subplot::AbstractVector{Int}': Optional vector with the indices of the subplots to use. When
+        missing, the first subplots are used.
++ `logger::Vector{TimeSeriesLogger{T,D}}`: Vector of loggers to plot
+"""
 function plotLogger!(
     plt::Union{Plots.Plot,Plots.Subplot},
-    clog::Vector{TimeSeriesLogger{T,D}};
+    logger::Vector{TimeSeriesLogger{T,D}};
 ) where {T,D}
-    for i in eachindex(clog)
-        plotLogger!(plt, i, clog[i])
+    for i in eachindex(logger)
+        plotLogger!(plt, i, logger[i])
     end
+    return nothing
 end
 function plotLogger!(
     plt::Union{Plots.Plot,Plots.Subplot},
     subplot::AbstractVector{Int},
-    clog::Vector{TimeSeriesLogger{T,D}};
+    logger::Vector{TimeSeriesLogger{T,D}};
 ) where {T,D}
-    for i in eachindex(subplot, clog)
-        plotLogger!(plt, subplot[i], clog[i])
+    for i in eachindex(subplot, logger)
+        plotLogger!(plt, subplot[i], logger[i])
     end
+    return nothing
 end
 
-"""Plot logger at a subplot"""
+"""
+Plot one logger in one subplot of a given plot.
+
+# Parameters:
++ `plt::Union{Plots.Plot,Plots.Subplot}`: Plot, typically with multiple subplots
++ 'subplot::Int': Index of the subplots to use.
++ `logger::TimeSeriesLogger{T,D}`: logger to plot
+"""
 function plotLogger!(
     plt::Union{Plots.Plot,Plots.Subplot},
     subplot::Int,
-    clog::TimeSeriesLogger{T,D};
+    logger::TimeSeriesLogger{T,D};
 ) where {T,D}
-
     plt[subplot].series_list = [] # new one to erase old points
     color_series = palette(:tab20)
-    nPoints = length(clog.time)
-    (t::Vector{T}, me::Matrix{Float64}, mn::Matrix{Float64}, mx::Matrix{Float64}) = subSample(clog)
+    nPoints = length(logger.time)
+    (t::Vector{T}, me::Matrix{Float64}, mn::Matrix{Float64}, mx::Matrix{Float64}) = subSample(logger)
     if nPoints < 50
         for d in axes(me, 2)
             Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
-                ylimits=clog.ylimits,
-                xlabel=clog.xlabel, ylabel=clog.ylabel,
-                labels=clog.legend[d], #legend=:topleft,
-                markershape=:circle, markerstrokewidth=0,
+                ylimits=logger.ylimits,
+                xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
+                markershape=:circle, markerstrokewidth=0, markercolor=color_series[d],
                 grid=true)
         end
     else
         for d in axes(me, 2)
             Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
-                ylimits=clog.ylimits,
-                xlabel=clog.xlabel, ylabel=clog.ylabel, labels=clog.legend[d],
+                ylimits=logger.ylimits,
+                xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
                 grid=true)
         end
     end
@@ -98,20 +148,27 @@ function plotLogger!(
     end
     return plt
 end
+"""
+Plot one logger in a new plot.
+
+# Parameters:
++ `logger::TimeSeriesLogger{T,D}`: logger to plot
+"""
 function plotLogger(
-    clog::TimeSeriesLogger{T,D}
+    logger::TimeSeriesLogger{T,D}
 ) where {T,D}
     plt = Plots.plot()
-    return plotLogger!(Plots.plot(), 1, clog)
+    return plotLogger!(Plots.plot(), 1, logger)
 end
 
+"""Subsample logger times to the desired number of points."""
 function subSample(
-    clog::TimeSeriesLogger{T,D},
+    logger::TimeSeriesLogger{T,D},
 ) where {T,D}
-    time = clog.time
-    data = clog.data
+    time = logger.time
+    data = logger.data
     (nD, nPoints) = size(data)
-    maxPoints = min(clog.maxPoints, nPoints)
+    maxPoints = min(logger.maxPoints, nPoints)
     t = Vector{T}(undef, maxPoints)
     me = Matrix{Float64}(undef, maxPoints, nD)
     mn = Matrix{Float64}(undef, maxPoints, nD)
