@@ -10,4 +10,5 @@ using Test
 begin
     include("test_Estimators.jl")
     include("test_LeastSquares.jl")
+    include("test_ConvergenceLogging.jl")
 end

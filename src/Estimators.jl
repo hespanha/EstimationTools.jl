@@ -118,6 +118,8 @@ end
 ## Linear Regression for 45-def plots
 #####################################
 
+# TODO: should have a Plots version
+
 """
 Compute and (optionally) plot 45-degree plots comparing
 (scalar) actual values with model forecast.

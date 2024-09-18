@@ -8,4 +8,7 @@ include("Estimators.jl")
 include("LeastSquares.jl")
 @reexport using .LeastSquares
 
+include("ConvergenceLogging.jl")
+@reexport using .ConvergenceLogging
+
 end # module EstimationTools
