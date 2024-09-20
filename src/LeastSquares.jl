@@ -192,6 +192,8 @@ function Base.push!(
     if lsd.K >= size(lsd.X, 2)
         compress!(lsd)
     end
+    @assert length(x) == size(lsd.X, 1)
+    @assert length(y) == size(lsd.Y, 1)
     lsd.K += 1
     lsd.X[:, lsd.K] .= x
     lsd.Y[:, lsd.K] .= y
@@ -205,6 +207,8 @@ function Base.push!(
     if lsd.K >= size(lsd.X, 2)
         compress!(lsd)
     end
+    @assert length(x) == size(lsd.X, 1)
+    @assert length(y) == size(lsd.Y, 1)
     lsd.K += 1
     lsd.X[:, lsd.K] .= x
     lsd.Y[:, lsd.K] .= y
@@ -218,6 +222,8 @@ function Base.push!(
     if lsd.K >= size(lsd.X, 2)
         compress!(lsd)
     end
+    @assert length(x) == size(lsd.X, 1)
+    @assert length(y) == size(lsd.Y, 1)
     lsd.K += 1
     lsd.X[:, lsd.K] = x
     lsd.Y[:, lsd.K] = y
