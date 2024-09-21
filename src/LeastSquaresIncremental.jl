@@ -37,6 +37,7 @@ import EstimationTools: leastSquares, reset! # to add methods
 # Parameters for constructor:
 - `nX::IntLS`: size of the vectors x_k
 - `nY::IntLS`: size of the vectors y_k
+- `lambda::FloatLS`: regularization parameter
 """
 mutable struct LSincremental{FloatLS,IntLS}
     R::Matrix{FloatLS}
@@ -53,9 +54,13 @@ mutable struct LSincremental{FloatLS,IntLS}
 end
 
 """
-    reset!(lsd::LSdata{FloatLS,IntLS})
+    reset!(lsi::LSincremental{FloatLS,IntLS},lambda::FloatLS)
 
-Clear all data from `LSdata`
+Clear all data from `LSincremental`
+
+# Parameters:
+- `lsi::LSincremental{FloatLS,IntLS}`: structure with data
+- `lambda::FloatLS`: regularization parameter
 """
 function reset!(
     lsi::LSincremental{FloatLS,IntLS},
@@ -72,7 +77,12 @@ end
 """
     push!(lsi::LSincremental{FloatLS,IntLS},x::Matrix{FloatLS},y::Matrix{FloatLS})
 
-Adds data vectors x and y to `LSincremental`
+Adds data vectors x and y to `LSincremental`.
+
+# Parameters:
+- `lsi::LSincremental{FloatLS,IntLS}`: structure with data
+- `x::AbstractVector{FloatLS}`: input vector
+- `y::AbstractVector{FloatLS}`: output vector
 """
 function Base.push!(
     lsi::LSincremental{FloatLS,IntLS},
@@ -90,28 +100,39 @@ function Base.push!(
     #@show alpha
     mul!(lsi.R, lsi.buffer_Rx, lsi.buffer_Rx', alpha, one(FloatLS))
     #@show lsi.R
-    return lsi
+    return nothing
 end
 
 """
     A=leastSquares!(lsi)
 
-Computes least-squares estimate
+Computes least-squares estimate.
+
+# Parameters:
+- `lsi::LSincremental{FloatLS,IntLS}`: structure with data
+
+# Returns:
+- `hatA::AbstractMatrix{FloatLS}`: least-squares estimate
 """
 function leastSquares(
     lsi::LSincremental{FloatLS,IntLS},
 ) where {FloatLS,IntLS}
     return lsi.YX * lsi.R
 end
+
 """
     leastSquares!(A,lsi)
 
 Computes least-squares estimate in place
 
+# Parameters:
+- `hatA::AbstractMatrix{FloatLS}`: least-squares estimate, returned in place
+- `lsi::LSincremental{FloatLS,IntLS}`: structure with data
+
 # Attention: 
 
-    If passing a submatrix as `A` a @view is required, as in
-        leastSquares!( (@view A[1:nY,1:nY]), lsi)
+    If passing a submatrix as `hatA` a @view is required, as in
+        leastSquares!( (@view hatA[1:nY,1:nY]), lsi)
     Otherwise the submatrix is not re-written.
 """
 function leastSquares!(
@@ -119,6 +140,6 @@ function leastSquares!(
     lsi::LSincremental{FloatLS,IntLS},
 ) where {FloatLS,IntLS}
     mul!(hatA, lsi.YX, lsi.R)
+    return hatA
 end
-return hatA
 end
