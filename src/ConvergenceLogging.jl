@@ -119,7 +119,8 @@ function plotLogger!(
     logger::TimeSeriesLogger{T,D};
 ) where {T,D}
     plt[subplot].series_list = [] # new one to erase old points
-    color_series = palette(:tab20)
+    #color_series = palette(:tab20, size(me, 2))
+    color_series = palette(:viridis, size(me, 2))
     nPoints = length(logger.time)
     (t::Vector{T}, me::Matrix{Float64}, mn::Matrix{Float64}, mx::Matrix{Float64}) = subSample(logger)
     if nPoints < 50
