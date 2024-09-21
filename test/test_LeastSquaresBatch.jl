@@ -113,9 +113,12 @@ function test1()
 
         # Get base line times
         b0 = @benchmark baseline($lsd, $X, $Y)
+        #display(b0)
         # check time
         b1 = @benchmark lsData($lsd, $X, $Y)
-        @printf("   time slowdown up=%g, allocs=%d memory=%d\n",
+        #display(b1)
+        @printf("   baseline time=%10.3f ms, compress! time=%10.3f ms, time slowdown up=%7.3f, compress! allocs=%d, memory=%d\n",
+            1e-6 * Statistics.mean(b0.times), 1e-6 * Statistics.mean(b1.times),
             Statistics.mean(b1.times) / Statistics.mean(b0.times), b1.memory, b1.allocs)
 
         @test b1.memory == 0
