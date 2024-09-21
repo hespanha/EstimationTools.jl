@@ -2,13 +2,16 @@ module EstimationTools
 
 using Reexport
 
-include("Estimators.jl")
+include(raw"Estimators.jl")
 @reexport using .Estimators
 
-include("LeastSquares.jl")
-@reexport using .LeastSquares
+include(raw"LeastSquaresBatch.jl")
+@reexport using .LeastSquaresBatch
 
-include("ConvergenceLogging.jl")
+include(raw"LeastSquaresIncremental.jl")
+@reexport using .LeastSquaresIncremental
+
+include(raw"ConvergenceLogging.jl")
 @reexport using .ConvergenceLogging
 
 end # module EstimationTools

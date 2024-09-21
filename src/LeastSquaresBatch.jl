@@ -1,4 +1,4 @@
-module LeastSquares
+module LeastSquaresBatch
 
 export LSreport, LSreports
 export LSdata, compress!, reset!
@@ -96,9 +96,9 @@ function Base.display(reports::LSreports; indent::Integer=0, brief::Bool=false)
     end
 end
 
-#######################################
-#### Least squares estimation - storage
-#######################################
+##################################
+#### Batch least squares - storage
+##################################
 
 """
    Structure used to store data to trains a linear model of the form
@@ -164,6 +164,7 @@ function compress!(
     lsd.K = 0
     return lsd
 end
+
 """
     reset!(lsd::LSdata{FloatLS,IntLS})
 
@@ -230,9 +231,9 @@ function Base.push!(
     return lsd
 end
 
-########################################
-#### Least squares estimation - solution
-########################################
+###################################
+#### Batch least squares - solution
+###################################
 
 """
     A=leastSquares(X::Matrix{FloatLS},Y::Matrix{FloatLS};lambda::FloatLS=convert(FloatLS,0.0))

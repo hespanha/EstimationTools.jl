@@ -1,5 +1,5 @@
 """
-Unit tests for LeastSquares.jl
+Unit tests for LeastSquaresBatch.jl
 
 2023 (C) Joao Hespanha
 """
