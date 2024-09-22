@@ -73,10 +73,10 @@ end
 
     nX = 10
     nY = 5
-    K = 30
+    nPoints = 30
 
     # multiple matrices to estimate
-    X = rand(Float64, nX, K)
+    X = rand(Float64, nX, nPoints)
     As = [rand(nY, nX) for i in 1:2]
     Ys = [A * X for A in As]
 
@@ -153,20 +153,20 @@ function test1()
     Kcache = 300
     lambda = 1e-6
 
-    for K in [200, 400, 1000]  # smaller and larger than cache
-        @printf("\n# K=%d, Kcache=%d\n", K, Kcache)
+    for nPoints in [200, 400, 1000]  # smaller and larger than cache
+        @printf("\n# nPoints=%d, Kcache=%d\n", nPoints, Kcache)
         lsd = LSdata{Float64,Int64}(nX, nY, Kcache)
         lsi = LSincremental(nX, nY, lambda)
         hatA = Matrix{Float64}(undef, nY, nX)
 
-        X = rand(Float64, nX, K)
-        Y = rand(Float64, nY, K)
+        X = rand(Float64, nX, nPoints)
+        Y = rand(Float64, nY, nPoints)
 
         #@time baseline(lsd, X, Y, lambda, hatA)
         #@time lsIncremental(lsi, X, Y, lambda, hatA)
 
         # Get base line times
-        b0 = @benchmark baseline($lsd, $X, $Y, $lambda, $hatA)
+        b0 = @benchmark baseline($lsd, $X, $Y, $lambda)
         #display(b0)
         # check time
         b1 = @benchmark lsIncremental($lsi, $X, $Y, $lambda, $hatA)

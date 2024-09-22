@@ -87,8 +87,8 @@ function test1()
     nY = 50
     Kcache = 300
 
-    for K in [200, 400, 1000]  # smaller and larger than cache
-        @printf("K=%d, Kcache=%d\n", K, Kcache)
+    for nPoints in [200, 400, 1000]  # smaller and larger than cache
+        @printf("nPoints=%d, Kcache=%d\n", nPoints, Kcache)
         lsd = LSdata{Float64,Int64}(nX, nY, Kcache)
         @test size(lsd.X) == (nX, Kcache)
         @test size(lsd.Y) == (nY, Kcache)
@@ -98,14 +98,14 @@ function test1()
         @test size(lsd.YY) == (nY, nY)
         @test lsd.KK == 0
 
-        X = rand(Float64, nX, K)
-        Y = rand(Float64, nY, K)
+        X = rand(Float64, nX, nPoints)
+        Y = rand(Float64, nY, nPoints)
 
         # check correctness
         lsData(lsd, X, Y)
-        if K <= size(lsd.X, 2)
-            @test lsd.X[:, 1:K] == X
-            @test lsd.Y[:, 1:K] == Y
+        if nPoints <= size(lsd.X, 2)
+            @test lsd.X[:, 1:nPoints] == X
+            @test lsd.Y[:, 1:nPoints] == Y
         end
         @test norm(lsd.XX - X * X') < 1e-8
         @test norm(lsd.YX - Y * X') < 1e-8
