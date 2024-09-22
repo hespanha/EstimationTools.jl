@@ -31,13 +31,22 @@ import EstimationTools: leastSquares, reset! # to add methods
 
 # Fields:
 - `R::Matrix{FloatLS}`: matrix R_K 
-- `K::IntLS`: number of data points
+- `K::IntLS`: number of data points 
 - `YX::Matrix{FloatLS}`: matrix Z_K
 
 # Parameters for constructor:
 - `nX::IntLS`: size of the vectors x_k
 - `nY::IntLS`: size of the vectors y_k
 - `lambda::FloatLS`: regularization parameter
+
+# Attention:
+
+1) The regularization parameter is fixed and remains the same regardless of the number of points,
+   which means that its effect vanishes as the number of points increases.
+
+   This may be desireable.
+
+2) The field `K:IntLS` is not really used.
 """
 mutable struct LSincremental{FloatLS,IntLS}
     R::Matrix{FloatLS}
