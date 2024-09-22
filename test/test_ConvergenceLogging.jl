@@ -36,24 +36,27 @@ begin
 end
 
 @testset "ConvergenceLogging" begin
-    @time clog = TimeSeriesLogger{Int,Float64}(3)
+    @time clog = TimeSeriesLogger{Int,Float64}(5)
     @test length(clog.time) == 0
-    @test size(clog.data) == (3, 0)
+    @test size(clog.data) == (5, 0)
 
-    @time append!(clog, 1, Float64[1, 3, 4])
+    @time append!(clog, 1, Float64[1, 3, 4, 5, -1])
     @test length(clog.time) == 1
-    @test size(clog.data) == (3, 1)
+    @test size(clog.data) == (5, 1)
 
-    @time append!(clog, 3, 2 .* Float64[1, 3, 4])
+    @time append!(clog, 3, 2 .* Float64[1, 3, 4, 5, -1])
     @test length(clog.time) == 2
-    @test size(clog.data) == (3, 2)
+    @test size(clog.data) == (5, 2)
 
-    @time plt = plotLogger(clog)
+    l = @layout [a b]
+    plts = plot(layout=l)
+    @time plotLogger!(plts, 1, clog)
+    @time plotLogger!(plts, 2, clog, colors=:viridis)
     for k in 1:4
-        append!(clog, 4 + k, (-1) .^ k .* Float64[1, 3, 4])
-        #@time plotLogger!(plt, clog)
-        @time plt = plotLogger(clog)
-        display(plt)
+        append!(clog, 4 + k, (-1) .^ k .* Float64[1, 3, 4, 5, -1])
+        @time plotLogger!(plts, 1, clog)
+        @time plotLogger!(plts, 2, clog, colors=:viridis)
+        display(plts)
         sleep(0.5)
     end
     @test length(clog.time) == 6

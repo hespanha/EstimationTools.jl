@@ -117,11 +117,13 @@ function plotLogger!(
     plt::Union{Plots.Plot,Plots.Subplot},
     subplot::Int,
     logger::TimeSeriesLogger{T,D};
+    #palette::Symbol=:viridis, # progressive
+    colors::Symbol=:glasbey_category10_n256, # categorical
 ) where {T,D}
     plt[subplot].series_list = [] # new one to erase old points
     #color_series = palette(:tab20, size(me, 2))
     (nD, nPoints) = size(logger.data)
-    color_series = palette(:viridis, nD)
+    color_series = palette(colors, nD)
     (t::Vector{T}, me::Matrix{Float64}, mn::Matrix{Float64}, mx::Matrix{Float64}) = subSample(logger)
     if nPoints < 50
         for d in axes(me, 2)
