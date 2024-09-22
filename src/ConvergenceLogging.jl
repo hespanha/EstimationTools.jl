@@ -84,13 +84,22 @@ Plot array of loggers, each in one subplot of a given plot.
 + 'subplot::AbstractVector{Int}': Optional vector with the indices of the subplots to use. When
         missing, the first subplots are used.
 + `logger::Vector{TimeSeriesLogger{T,D}}`: Vector of loggers to plot
++ `colors::Symbol=:glasbey_category10_n256`: color scheme to use in palette(). 
+        Typical values include:
+        + `:glasbey_category10_n256` - good for categorucal data with many categories
+        + `:virilis` - progressive palette from purple to yellow
+        + `:hot` - progressive palete from black to yellow
+        + `:lajolla` - progressive palette from yellow to black
+        + `:temperaturemap` - progressive palette from blue to red
+        See [https://docs.juliaplots.org/latest/generated/colorschemes/]
 """
 function plotLogger!(
     plt::Union{Plots.Plot,Plots.Subplot},
     logger::Vector{TimeSeriesLogger{T,D}};
+    kwargs...
 ) where {T,D}
     for i in eachindex(logger)
-        plotLogger!(plt, i, logger[i])
+        plotLogger!(plt, i, logger[i], kwargs...)
     end
     return nothing
 end
@@ -98,9 +107,10 @@ function plotLogger!(
     plt::Union{Plots.Plot,Plots.Subplot},
     subplot::AbstractVector{Int},
     logger::Vector{TimeSeriesLogger{T,D}};
+    kwargs...
 ) where {T,D}
     for i in eachindex(subplot, logger)
-        plotLogger!(plt, subplot[i], logger[i])
+        plotLogger!(plt, subplot[i], logger[i], kwargs...)
     end
     return nothing
 end
@@ -117,7 +127,7 @@ function plotLogger!(
     plt::Union{Plots.Plot,Plots.Subplot},
     subplot::Int,
     logger::TimeSeriesLogger{T,D};
-    #palette::Symbol=:viridis, # progressive
+    #colors::Symbol=:viridis, # progressive
     colors::Symbol=:glasbey_category10_n256, # categorical
 ) where {T,D}
     plt[subplot].series_list = [] # new one to erase old points
