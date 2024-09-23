@@ -11,6 +11,8 @@ import EstimationTools: leastSquares, reset! # to add methods
 ##################################
 
 """
+
+
    Structure used to store data to trains *incrementally* a linear model of the form
         y_k = A x_k + noise    k in 1:K
     using least-squares.
@@ -33,6 +35,10 @@ import EstimationTools: leastSquares, reset! # to add methods
 - `R::Matrix{FloatLS}`: matrix R_K 
 - `K::IntLS`: number of data points 
 - `YX::Matrix{FloatLS}`: matrix Z_K
+
+Constructor:
+
+    LSincremental(nX::IntLS, nY::IntLS, lambda::FloatLS) 
 
 # Parameters for constructor:
 - `nX::IntLS`: size of the vectors x_k
@@ -97,6 +103,24 @@ function Base.push!(
     lsi::LSincremental{FloatLS,IntLS},
     x::AbstractVector{FloatLS},
     y::AbstractVector{FloatLS},
+) where {FloatLS,IntLS}
+    lsi.K += 1
+    # YX = YX + y*x'
+    mul!(lsi.YX, y, x', one(FloatLS), one(FloatLS))
+
+    # R = R - (R*x)*(R*x)' / (1+x*R*X)
+    mul!(lsi.buffer_Rx, lsi.R, x)
+    #@show lsi.buffer_Rx
+    alpha = -one(FloatLS) / (one(FloatLS) + dot(x, lsi.buffer_Rx))
+    #@show alpha
+    mul!(lsi.R, lsi.buffer_Rx, lsi.buffer_Rx', alpha, one(FloatLS))
+    #@show lsi.R
+    return nothing
+end
+function Base.push!(
+    lsi::LSincremental{FloatLS,IntLS},
+    x::AbstractVector{FloatLS},
+    y::FloatLS,
 ) where {FloatLS,IntLS}
     lsi.K += 1
     # YX = YX + y*x'
