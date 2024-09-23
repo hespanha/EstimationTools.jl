@@ -226,8 +226,8 @@ function Base.push!(
     @assert length(x) == size(lsd.X, 1)
     @assert length(y) == size(lsd.Y, 1)
     lsd.K += 1
-    lsd.X[:, lsd.K] = x
-    lsd.Y[:, lsd.K] = y
+    lsd.X[:, lsd.K] .= x
+    lsd.Y[:, lsd.K] .= y
     return lsd
 end
 
