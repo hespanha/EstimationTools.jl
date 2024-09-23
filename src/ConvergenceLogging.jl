@@ -86,7 +86,8 @@ Plot array of loggers, each in one subplot of a given plot.
 + `logger::Vector{TimeSeriesLogger{T,D}}`: Vector of loggers to plot
 + `colors::Symbol=:glasbey_category10_n256`: color scheme to use in palette(). 
         Typical values include:
-        + `:glasbey_category10_n256` - good for categorucal data with many categories
+        + `:tab20` - good for categorical data with few categories (20 or less)
+        + `:glasbey_category10_n256` - good for categorical data with many categories
         + `:virilis` - progressive palette from purple to yellow
         + `:hot` - progressive palete from black to yellow
         + `:lajolla` - progressive palette from yellow to black
