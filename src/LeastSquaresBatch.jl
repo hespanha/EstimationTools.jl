@@ -217,6 +217,21 @@ function Base.push!(
 end
 function Base.push!(
     lsd::LSdata{FloatLS,IntLS},
+    x::Vector{FloatLS},
+    y::FloatLS,
+) where {FloatLS,IntLS}
+    if lsd.K >= size(lsd.X, 2)
+        compress!(lsd)
+    end
+    @assert length(x) == size(lsd.X, 1)
+    @assert size(lsd.Y, 1) == 1
+    lsd.K += 1
+    lsd.X[:, lsd.K] .= x
+    lsd.Y[:, lsd.K] .= y
+    return lsd
+end
+function Base.push!(
+    lsd::LSdata{FloatLS,IntLS},
     x::SubArray{FloatLS,1,Matrix{FloatLS},Tuple{Base.Slice{Base.OneTo{IntLS}},IntLS},true},
     y::SubArray{FloatLS,1,Matrix{FloatLS},Tuple{Base.Slice{Base.OneTo{IntLS}},IntLS},true},
 ) where {FloatLS,IntLS}
