@@ -154,6 +154,21 @@ mutable struct LSdata{FloatLS,IntLS}
 end
 
 """
+    reset!(lsd::LSdata{FloatLS,IntLS})
+
+Clear all data from `LSdata`
+"""
+function reset!(
+    lsd::LSdata{FloatLS,IntLS},
+) where {FloatLS,IntLS}
+    lsd.K = 0
+    fill!(lsd.XX, 0)
+    fill!(lsd.YX, 0)
+    fill!(lsd.YY, 0)
+    lsd.KK = 0
+end
+
+"""
     compress(lsd::LSdata{FloatLS,IntLS})
 
 Moves data in `LSdata` stored in X,Y,K into XX,YX,YY,KK
@@ -175,21 +190,6 @@ function compress!(
     lsd.KK += lsd.K
     lsd.K = 0
     return lsd
-end
-
-"""
-    reset!(lsd::LSdata{FloatLS,IntLS})
-
-Clear all data from `LSdata`
-"""
-function reset!(
-    lsd::LSdata{FloatLS,IntLS},
-) where {FloatLS,IntLS}
-    lsd.K = 0
-    fill!(lsd.XX, 0)
-    fill!(lsd.YX, 0)
-    fill!(lsd.YY, 0)
-    lsd.KK = 0
 end
 
 """

@@ -79,11 +79,12 @@ function reset!(
     lsi::LSincremental{FloatLS,IntLS},
     lambda::FloatLS,
 ) where {FloatLS,IntLS}
-    fill!(lsi.R, 0)
+    fill!(lsi.R, zero(FloatLS))
     lambda = 1 / lambda
     for i in 1:size(lsi.R, 1)
         lsi.R[i, i] = lambda
     end
+    fill!(lsi.YX, zero(FloatLS))
     lsi.K = 0
 end
 
