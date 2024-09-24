@@ -34,6 +34,10 @@ Report with status from least-squares estimation, indexed by report parameters.
             "regularizer" => [minimum(diag(regularizer)) maximum(diag(regularizer))],
             "time" => dt,
             "alloc" => db,)
+
+Reports can ve viewed with
+
+    Base.display(report::LSreport; indent::Integer=0, brief::Bool=false)
 """
 const LSreport = SortedDict{String,Union{Int64,Float64,Matrix{Float64}}}    # sorted by key order, requires DataStructures.jl
 #const LSreport = Dict{String,Float64}          # regular Dictionaries
@@ -47,7 +51,7 @@ const LSreport = SortedDict{String,Union{Int64,Float64,Matrix{Float64}}}    # so
 Collection of reports with status from multiple least-squares estimations, indexed by estimation
 description.
 
-Example
+# Example
 
     reports::LSreports = Dict(
         "dynamics" => Dict(
@@ -57,6 +61,10 @@ Example
             "msqe" => rmseOutput,
             "msqy" => rmsyOutput,),
     )
+
+Reports can ve viewed with
+
+    Base.display(reports::LSreports; indent::Integer=0, brief::Bool=false)
 """
 const LSreports = SortedDict{String,LSreport} # sorted by key order, requires DataStructures.jl
 
@@ -115,6 +123,10 @@ end
 - `KK::IntLS`: number of summations in XX, YX, and YY
 
    Terms that have already been included into XX,YX,YY,KK do not appear in X,Y,K
+
+# Constructor:
+
+    LSdata{FloatLS,IntLS}(nX, nY, Kcache)
 
 # Parameters for constructor:
 - `nX::IntLS`: size of the vectors x_k

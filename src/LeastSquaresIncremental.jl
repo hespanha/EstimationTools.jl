@@ -11,8 +11,6 @@ import EstimationTools: leastSquares, reset! # to add methods
 ##################################
 
 """
-
-
    Structure used to store data to trains *incrementally* a linear model of the form
         y_k = A x_k + noise    k in 1:K
     using least-squares.
@@ -36,7 +34,7 @@ import EstimationTools: leastSquares, reset! # to add methods
 - `K::IntLS`: number of data points 
 - `YX::Matrix{FloatLS}`: matrix Z_K
 
-Constructor:
+# Constructor:
 
     LSincremental(nX::IntLS, nY::IntLS, lambda::FloatLS) 
 
