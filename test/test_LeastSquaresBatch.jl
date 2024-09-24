@@ -47,7 +47,7 @@ end
     @test norm(hatA) < 1e-5
 end
 
-@testset "test leastSquares: using LSdata" begin
+@testset "test leastSquares: using LSdata & reset!" begin
     # identity X, square
     X = [1.0 0.0; 0.0 1.0]
     A = 2.0Matrix{Float64}(I, 2, 2)
@@ -62,6 +62,13 @@ end
     end
     (hatA, report) = leastSquares(lsd; verbose=true, lambda=0.0)
     @test hatA ≈ A
+
+    reset!(lsd)
+    @test lsd.K == 0
+    @test lsd.KK == 0
+    @test all(lsd.XX .== 0)
+    @test all(lsd.YX .== 0)
+    @test all(lsd.YY .== 0)
 end
 
 

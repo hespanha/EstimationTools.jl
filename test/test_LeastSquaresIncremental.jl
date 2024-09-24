@@ -15,7 +15,7 @@ using Statistics
 
 using EstimationTools
 
-@testset "test leastSquares: test least squares with small regularization" begin
+@testset "test leastSquares: test least squares with small regularization & reset!" begin
     Random.seed!(0)
 
     # identity X, square
@@ -66,6 +66,11 @@ using EstimationTools
     @show hatAA = leastSquares(lsi)
     @show norm(A - hatAA)
     @test isapprox(hatAA, A; rtol=1e-5)
+
+    reset!(lsi, lambda)
+    @test lsi.K == 0
+    @test all(lsi.YX .== 0)
+    @test lsi.R == 1 / lambda * I
 end
 
 @testset "test leastSquares: test in-place least squares with small regularization" begin
