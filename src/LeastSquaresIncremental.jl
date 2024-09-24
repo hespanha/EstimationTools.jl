@@ -48,7 +48,9 @@ import EstimationTools: leastSquares, reset! # to add methods
 1) The regularization parameter is fixed and remains the same regardless of the number of points,
    which means that its effect vanishes as the number of points increases.
 
-   This may be desireable.
+   This may be desirable.
+
+   This corresponds to `fixedRegularization=true` in batch leastSquares()
 
 2) The field `K:IntLS` is not really used.
 """

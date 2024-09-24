@@ -280,8 +280,12 @@ where A is a solution to the following least-squares problem
 - `Y::Matrix{FloatLS}(nY,nSamples)`: dependent variable
             [y_1 y_2 ... y_K]
 - `lambda::FloatLS=convert(FloatLS,0.0)`: regularization parameter
-- `uniformRegularization::Bool=false`: if `true`, regularization is based in scaled identity; otherwise a general diagonal matrix
 - `regularization::Bool=true`: if `true` uses regularization by adding a penalty term
+- `fixedRegularization::Bool=false`: if `true` regularization is based on the identity matrix
+        scaled by `lambda` (without further scaling); otherwise the regularization is "scaled" based
+        on the diagonal elements of X * X'
+- `uniformRegularization::Bool=false`: if `true`, regularization is based in scaled identity;
+        otherwise a general diagonal matrix
 - `method4LSQ::Symbol=:rdiv`: method uses to compute least-squares solution, among the options
         + `:rdiv`: uses `\` to invert (X * X' + regularization matrix)
         + `:pinv`: uses `\` to invert (X * X' + regularization matrix)
@@ -418,6 +422,7 @@ function leastSquares(
     YYK::Matrix{FloatLS},
     K::Integer;
     lambda::FloatLS=convert(FloatLS, 0.0),
+    fixedRegularization::Bool=false,
     uniformRegularization::Bool=false,
     #regularization::Bool=false,
     #method4LSQ::Symbol=:eig,    # in [:rdiv, :pinv, :svd, :eig]
@@ -437,20 +442,24 @@ function leastSquares(
     nUnknowns = nY * nX
 
     if regularization
-        if uniformRegularization
-            ## scaled identity
-            #    normXXK = norm(diag(XXK))
-            #    normXXK = minimum(abs.(diag(XXK))) # not good if zero in diagonal
-            normXXK = mean(abs.(diag(XXK)))
-            if normXXK > 0
-                lambdaScaled = lambda * normXXK # scale lambda
-            else
-                lambdaScaled = lambda
-            end
-            regularizer = lambdaScaled * Matrix{FloatLS}(I, nX, nX)
+        if fixedRegularization
+            regularizer = lambda * Matrix{FloatLS}(I, nX, nX)
         else
-            ## diagonal
-            regularizer = diagm(lambda * max.(diag(XXK), 1e-3))
+            if uniformRegularization
+                ## scaled identity
+                #    normXXK = norm(diag(XXK))
+                #    normXXK = minimum(abs.(diag(XXK))) # not good if zero in diagonal
+                normXXK = mean(abs.(diag(XXK)))
+                if normXXK > 0
+                    lambdaScaled = lambda * normXXK # scale lambda
+                else
+                    lambdaScaled = lambda
+                end
+                regularizer = lambdaScaled * Matrix{FloatLS}(I, nX, nX)
+            else
+                ## diagonal
+                regularizer = diagm(lambda * max.(diag(XXK), 1e-3))
+            end
         end
     else
         regularizer = zeros(FloatLS, size(XXK))
