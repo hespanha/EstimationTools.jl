@@ -314,11 +314,16 @@ function leastSquares(
     (nX, K) = size(X)
     @assert any(isnan.(Y)) == false "leastSquares: Y cannot have NaN"
     @assert any(isnan.(X)) == false "leastSquares: X cannot have NaN"
-    @assert K > 0 "leastSquares: data set cannot be empty"
 
-    @timeit timerOutput "XXK" XXK = (X * X') / K
-    @timeit timerOutput "YXK" YXK = (Y * X') / K
-    @timeit timerOutput "YYK" YYK = Y * Y' / K
+    if K > 0
+        @timeit timerOutput "XXK" XXK = (X * X') / K
+        @timeit timerOutput "YXK" YXK = (Y * X') / K
+        @timeit timerOutput "YYK" YYK = (Y * Y') / K
+    else
+        @timeit timerOutput "XXK" XXK = (X * X')
+        @timeit timerOutput "YXK" YXK = (Y * X')
+        @timeit timerOutput "YYK" YYK = (Y * Y')
+    end
 
     rc = leastSquares(XXK, YXK, YYK, K; timerOutput, verbose, kwargs...)
 
@@ -394,9 +399,15 @@ function leastSquares(
     @timeit timerOutput "compress!" compress!(lsData)
     K::IntLS = lsData.KK
 
-    @timeit timerOutput "XXK" XXK = lsData.XX / K
-    @timeit timerOutput "YXK" YXK = lsData.YX / K
-    @timeit timerOutput "YYK" YYK = lsData.YY / K
+    if K > 0
+        @timeit timerOutput "XXK" XXK = lsData.XX / K
+        @timeit timerOutput "YXK" YXK = lsData.YX / K
+        @timeit timerOutput "YYK" YYK = lsData.YY / K
+    else
+        @timeit timerOutput "XXK" XXK = lsData.XX
+        @timeit timerOutput "YXK" YXK = lsData.YX
+        @timeit timerOutput "YYK" YYK = lsData.YY
+    end
 
     rc = leastSquares(XXK, YXK, YYK, K; timerOutput, verbose, kwargs...)
 
