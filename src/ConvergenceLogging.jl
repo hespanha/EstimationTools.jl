@@ -156,7 +156,7 @@ function plotLogger!(
         k = .!(isnan.(mn[:, d]) .|| isnan.(mx[:, d]) .|| isinf.(mn[:, d]) .|| isinf.(mx[:, d]))
         if any(k)
             Plots.plot!(plt[subplot], t[k], mn[k, d], fillrange=mx[k, d], linecolor=color_series[d],
-                c=1, fillalpha=0.1, linealpha=0,
+                c=color_series[d], fillalpha=0.1, linealpha=0,
                 label="")
         end
     end

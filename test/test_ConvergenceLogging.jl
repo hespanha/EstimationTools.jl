@@ -35,7 +35,7 @@ begin
     testSpeed()
 end
 
-@testset "ConvergenceLogging" begin
+@testset "ConvergenceLogging: small number of points" begin
     @time clog = TimeSeriesLogger{Int,Float64}(5)
     @test length(clog.time) == 0
     @test size(clog.data) == (5, 0)
@@ -61,5 +61,24 @@ end
     end
     @test length(clog.time) == 6
     @test size(clog.data) == (5, 6)
+end
+
+@testset "ConvergenceLogging: many points with bands"
+
+begin
+    @time clog = TimeSeriesLogger{Int,Float64}(3)
+    @test length(clog.time) == 0
+    @test size(clog.data) == (3, 0)
+
+    N = 1000
+    for t in 1:1000
+        append!(clog, t, rand(3) .+ [2.0, 3.5, 5])
+    end
+
+    l = @layout [a; b]
+    plts = plot(layout=l)
+    @time plotLogger!(plts, 1, clog)
+    @time plotLogger!(plts, 2, clog, colors=:temperaturemap)
 
 end
+
