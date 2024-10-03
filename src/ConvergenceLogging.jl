@@ -88,8 +88,8 @@ Plot array of loggers, each in one subplot of a given plot.
         Typical values include:
         + `:tab20` - good for categorical data with few categories (20 or less)
         + `:glasbey_category10_n256` - good for categorical data with many categories
-        + `:virilis` - progressive palette from purple to yellow
-        + `:hot` - progressive palete from black to yellow
+        + `:viridis` - progressive palette from purple to yellow
+        + `:hot` - progressive palette from black to yellow
         + `:lajolla` - progressive palette from yellow to black
         + `:temperaturemap` - progressive palette from blue to red
         See [https://docs.juliaplots.org/latest/generated/colorschemes/]
