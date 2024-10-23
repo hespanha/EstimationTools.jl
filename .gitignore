@@ -1,4 +1,5 @@
 ## Auxiliary test files
+test/testTrackBenchmarks.csv
 test/data/*.jld
 test/data/*.jld2
 
