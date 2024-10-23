@@ -12,4 +12,5 @@ begin
     include("test_ConvergenceLogging.jl")
     include("test_LeastSquaresBatch.jl")
     include("test_LeastSquaresIncremental.jl")
+    include("test_TrackBenchmarks.jl")
 end
