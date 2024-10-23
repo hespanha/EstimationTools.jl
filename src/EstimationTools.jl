@@ -14,4 +14,7 @@ include(raw"LeastSquaresIncremental.jl")
 include(raw"ConvergenceLogging.jl")
 @reexport using .ConvergenceLogging
 
+include(raw"TrackBenchmarks.jl")
+@reexport using .TrackBenchmarks
+
 end # module EstimationTools
