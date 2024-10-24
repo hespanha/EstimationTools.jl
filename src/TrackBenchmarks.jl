@@ -27,12 +27,18 @@ struct Description
     function Description(name::String; varargs...)
         parNames = [string(key) for (key, value) in varargs]
         parValues = [value for (key, value) in varargs]
+        if isempty(parNames)
+            parNames = String[]
+            parValues = Any[]
+        end
         return new(name, parNames, parValues)
     end
     function Description(; varargs...)
         return Description(""; varargs...)
     end
 end
+
+Base.isempty(d::Description) = ismpty(d.name) && isempty(parNames)
 
 # TODO: pruning not implemented
 """
@@ -48,6 +54,7 @@ function saveBenchmark(
     filename::String;
     solver::Description,
     problem::Description,
+    result::Description=Description(),
     time::Description,
     benchmarkTime::ZonedDateTime=now(localzone()),
     pruneBy::Period=Hour(0))
@@ -89,17 +96,19 @@ function saveBenchmark(
     end
     ## Add current benchmark
     df1 = DataFrame(
-        benchmarkTime=[benchmarkTime],
-        solverName=String[solver.name],
-        problemName=[problem.name],
-        problemValues=[string(problem.parValues)],
-        timeValues=[time.parValues],
-        timesNames=[string(time.parNames)],
-        solverValues=[string(solver.parValues)],
-        problemParameters=[string(problem.parNames)],
-        solverParameters=[string(solver.parNames)],
-        gitCommitHash=[gitCommitHash],
-        gitCommitTime=[gitCommitTime],)
+        benchmarkTime=[benchmarkTime],                  # 1
+        solverName=String[solver.name],                 # 2
+        problemName=[problem.name],                     # 3
+        problemValues=[string(problem.parValues)],      # 4
+        resultValues=[string(result.parValues)],        # 5
+        timeValues=[time.parValues],                    # 6
+        resultParameters=[string(result.parNames)],     # 7
+        timesNames=[string(time.parNames)],             # 8
+        solverValues=[string(solver.parValues)],        # 9
+        problemParameters=[string(problem.parNames)],   #10
+        solverParameters=[string(solver.parNames)],     #11
+        gitCommitHash=[gitCommitHash],                  #12
+        gitCommitTime=[gitCommitTime],)                 #13
     #display(df)
     #display(df1)
 
@@ -114,15 +123,17 @@ function saveBenchmark(
         @printf("saveBenchmark: added (zero pruneBy)\n")
         df = vcat(df, df1)
     else
-        ## compute rows that match solver+problem+prune time
+        ## compute rows that match solver+problem+result+prune time
         fields2match = [
             3, # problemName
             4, # problemValues
-            8, # problemParameters
-            6, # timesNames
+            10,# problemParameters
+            8, # timesNames
+            5, # resultValues
+            7, # resultParameters
             2, # solverName
-            7, # solverValues
-            9, # solverParameters
+            9, # solverValues
+            11,# solverParameters
         ]
         tMatch = (df[:, fields2match] .== df1[:, fields2match])
         kMatchProblem = vec(collect(all(Matrix(tMatch), dims=2))) # convert BitMatrix to Bool
@@ -143,6 +154,8 @@ function saveBenchmark(
                 @printf("saveBenchmark: added (better times than matched)\n")
                 df = vcat(df, df1)
                 save = true
+            else
+                @printf("saveBenchmark: not added (not better times than matched)\n")
             end
         end
     end

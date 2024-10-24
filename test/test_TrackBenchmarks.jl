@@ -6,12 +6,12 @@ Unit tests for TrackBenchmarks.jl
 
 # TODO: test remove from IPsparse
 
+using Dates
 using Test
 
 using EstimationTools
 
 @testset "saveBenchmark" begin
-
     d = Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9)
     d = Description(solveTime=0.1, solveTimeWithoutPrint=0.05, nIter=4)
 
@@ -27,14 +27,16 @@ using EstimationTools
         solver=Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9),
         problem=Description("Rock paper Scissors", nU=10, nEqU=1),
         time=Description(solveTime=0.1, solveTimeWithoutPrint=0.05, nIter=5),
+        result=Description(minimum=10.5),
         pruneBy=Minute(100))
 
-    # not better
+    # not better and equal
     @time df = saveBenchmark(
         filename,
         solver=Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9),
         problem=Description("Rock paper Scissors", nU=10, nEqU=1),
         time=Description(solveTime=0.1, solveTimeWithoutPrint=0.05, nIter=5),
+        result=Description(minimum=10.5),
         pruneBy=Minute(100))
 
     # better
@@ -51,6 +53,7 @@ using EstimationTools
         solver=Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9),
         problem=Description("Rock paper Scissors", nU=10, nEqU=1),
         time=Description(solveTime=0.1, nIter=6.0),
+        result=Description(maximum=50),
         pruneBy=Minute(100))
 
     # better but different
@@ -59,6 +62,7 @@ using EstimationTools
         solver=Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9),
         problem=Description("Rock paper Scissors", nU=10, nEqU=1),
         time=Description(solveTime=0.1, nIter=5.0),
+        result=Description(minimum=10.5, maximum=51.0),
         pruneBy=Minute(100))
 
     @test size(df, 1) == 4
@@ -69,4 +73,10 @@ using EstimationTools
         [0.1, 6.0],
         [0.1, 5.0]]
 
+    @test df.resultValues == [
+        "[10.5]",
+        "Any[]",
+        "[50]",
+        "[10.5, 51.0]"
+    ]
 end
