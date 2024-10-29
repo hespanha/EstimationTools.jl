@@ -66,14 +66,17 @@ end
 @testset "ConvergenceLogging: many points with bands"
 
 begin
-    @time clog = TimeSeriesLogger{Int,Float64}(3)
+    legend = ["series1", "series2", "series nan", "series 3"]
+    @time clog = TimeSeriesLogger{Int,Float64}(4; legend)
     @test length(clog.time) == 0
-    @test size(clog.data) == (3, 0)
+    @test size(clog.data) == (4, 0)
+    @test clog.legend == legend
 
     N = 1000
-    for t in 1:1000
-        append!(clog, t, rand(3) .+ [2.0, 3.5, 5])
+    for t in 1:N
+        append!(clog, t, rand(4) .+ [2.0, 3.5, NaN, 5])
     end
+    @test size(clog.data) == (4, N)
 
     l = @layout [a; b]
     plts = plot(layout=l)

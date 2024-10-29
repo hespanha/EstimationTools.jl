@@ -138,18 +138,22 @@ function plotLogger!(
     (t::Vector{T}, me::Matrix{Float64}, mn::Matrix{Float64}, mx::Matrix{Float64}) = subSample(logger)
     if nPoints < 50
         for d in axes(me, 2)
-            Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
-                ylimits=logger.ylimits,
-                xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
-                markershape=:circle, markerstrokewidth=0, markercolor=color_series[d],
-                grid=true)
+            if any(.!isnan.(me[:, d]))
+                Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
+                    ylimits=logger.ylimits,
+                    xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
+                    markershape=:circle, markerstrokewidth=0, markercolor=color_series[d],
+                    grid=true)
+            end
         end
     else
         for d in axes(me, 2)
-            Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
-                ylimits=logger.ylimits,
-                xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
-                grid=true)
+            if any(.!isnan.(me[:, d]))
+                Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
+                    ylimits=logger.ylimits,
+                    xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
+                    grid=true)
+            end
         end
     end
     for d in axes(me, 2)
