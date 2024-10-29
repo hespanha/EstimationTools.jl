@@ -17,7 +17,7 @@ begin
 
         #VSCodeServer.PLOT_PANE_ENABLED[] = true
         #VSCodeServer.PLOT_PANE_ENABLED[] = false
-        display(VSCodeServer.PLOT_PANE_ENABLED[])
+        #display(VSCodeServer.PLOT_PANE_ENABLED[])
 
         println(:png)
         @time plt2 = plot(t, sa', fmt=:png)
@@ -63,25 +63,23 @@ end
     @test size(clog.data) == (5, 6)
 end
 
-@testset "ConvergenceLogging: many points with bands"
-
-begin
-    legend = ["series1", "series2", "series nan", "series 3"]
-    @time clog = TimeSeriesLogger{Int,Float64}(4; legend)
+@testset "ConvergenceLogging: many points with bands" begin
+    legend = ["series 1", "series 2", "series nan", "series inf", "series 5"]
+    @time clog = TimeSeriesLogger{Int,Float64}(5; legend)
     @test length(clog.time) == 0
-    @test size(clog.data) == (4, 0)
+    @test size(clog.data) == (5, 0)
     @test clog.legend == legend
 
     N = 1000
     for t in 1:N
-        append!(clog, t, rand(4) .+ [2.0, 3.5, NaN, 5])
+        append!(clog, t, rand(5) .+ [2.0, 3.5, NaN, -Inf, 5])
     end
-    @test size(clog.data) == (4, N)
+    @test size(clog.data) == (5, N)
 
     l = @layout [a; b]
     plts = plot(layout=l)
     @time plotLogger!(plts, 1, clog)
     @time plotLogger!(plts, 2, clog, colors=:temperaturemap)
-
+    display(plts)
 end
 

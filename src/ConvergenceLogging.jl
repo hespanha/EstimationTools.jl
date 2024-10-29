@@ -138,7 +138,7 @@ function plotLogger!(
     (t::Vector{T}, me::Matrix{Float64}, mn::Matrix{Float64}, mx::Matrix{Float64}) = subSample(logger)
     if nPoints < 50
         for d in axes(me, 2)
-            if any(.!isnan.(me[:, d]))
+            if any(isfinite.(me[:, d])) # exclude series with only nan and inf
                 Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
                     ylimits=logger.ylimits,
                     xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
@@ -147,8 +147,8 @@ function plotLogger!(
             end
         end
     else
-        for d in axes(me, 2)
-            if any(.!isnan.(me[:, d]))
+        for d in axes(me, 2) # exclude series with only nan and inf
+            if any(isfinite.(me[:, d]))
                 Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
                     ylimits=logger.ylimits,
                     xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
@@ -157,7 +157,7 @@ function plotLogger!(
         end
     end
     for d in axes(me, 2)
-        k = .!(isnan.(mn[:, d]) .|| isnan.(mx[:, d]) .|| isinf.(mn[:, d]) .|| isinf.(mx[:, d]))
+        k = isfinite.(mn[:, d]) .&& isfinite.(mx[:, d]) # exclude nan and inf
         if any(k)
             Plots.plot!(plt[subplot], t[k], mn[k, d], fillrange=mx[k, d], linecolor=color_series[d],
                 c=color_series[d], fillalpha=0.1, linealpha=0,
