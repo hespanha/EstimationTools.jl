@@ -12,8 +12,17 @@ using Test
 using EstimationTools
 
 @testset "saveBenchmark" begin
+    d = Description()
+    @test isempty(d) == true
+    display(d)
+
     d = Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9)
+    @test isempty(d) == false
+    display(d)
+
     d = Description(solveTime=0.1, solveTimeWithoutPrint=0.05, nIter=4)
+    @test isempty(d) == false
+    display(d)
 
     filename = "test/testTrackBenchmarks.csv"
     try

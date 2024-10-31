@@ -37,8 +37,20 @@ struct Description
         return Description(""; varargs...)
     end
 end
-
-Base.isempty(d::Description) = ismpty(d.name) && isempty(parNames)
+Base.isempty(d::Description) = isempty(d.name) && isempty(d.parNames)
+function Base.show(io::IO, d::Description)
+    if ~isempty(d)
+        if ~isempty(d.name)
+            @printf(io, "%s:", d.name)
+        else
+            @printf(io, "Description:")
+        end
+        for i in 1:length(d.parNames)
+            @printf(io, "\n   %-25s: %s", d.parNames[i], string(d.parValues[i]))
+        end
+    end
+    return nothing
+end
 
 # TODO: pruning not implemented
 """
