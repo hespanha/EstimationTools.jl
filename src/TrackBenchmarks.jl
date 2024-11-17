@@ -51,6 +51,10 @@ function Base.show(io::IO, d::Description)
     end
     return nothing
 end
+Base.convert(::Type{Dict}, d::Description) =
+    Dict(Symbol(d.parNames[i]) => d.parValues[i] for i in eachindex(d.parNames, d.parValues))
+Base.convert(::Type{NamedTuple}, d::Description) =
+    NamedTuple(Symbol(d.parNames[i]) => d.parValues[i] for i in eachindex(d.parNames, d.parValues))
 
 # TODO: pruning not implemented
 """

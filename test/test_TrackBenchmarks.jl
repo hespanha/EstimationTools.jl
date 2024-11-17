@@ -17,12 +17,20 @@ using EstimationTools
     display(d)
 
     d = Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9)
-    @test isempty(d) == false
     display(d)
+    @test isempty(d) == false
 
     d = Description(solveTime=0.1, solveTimeWithoutPrint=0.05, nIter=4)
-    @test isempty(d) == false
     display(d)
+    @test isempty(d) == false
+
+    di = convert(Dict, d)
+    display(di)
+    @test di == Dict(:solveTime => 0.1, :solveTimeWithoutPrint => 0.05, :nIter => 4)
+
+    dn = convert(NamedTuple, d)
+    display(dn)
+    @test dn == (solveTime=0.1, solveTimeWithoutPrint=0.05, nIter=4)
 
     filename = "test/testTrackBenchmarks.csv"
     try
