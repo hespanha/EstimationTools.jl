@@ -83,3 +83,23 @@ end
     display(plts)
 end
 
+@testset "ConvergenceLogging: many points with bands in random order" begin
+    legend = ["series 1", "series 2", "series nan", "series inf", "series 5"]
+    @time clog = TimeSeriesLogger{Int,Float64}(5; legend, yaxis=:log2, xaxis=:log10)
+    @test length(clog.time) == 0
+    @test size(clog.data) == (5, 0)
+    @test clog.legend == legend
+
+    N = 1000
+    for t in 1:N
+        tr = rand(1:N)
+        append!(clog, tr, [2.0, 3.5, NaN, -Inf, 5] .* sqrt(tr))
+    end
+    @test size(clog.data) == (5, N)
+
+    l = @layout [a; b]
+    plts = plot(layout=l)
+    @time plotLogger!(plts, 1, clog)
+    @time plotLogger!(plts, 2, clog, colors=:temperaturemap)
+    display(plts)
+end
