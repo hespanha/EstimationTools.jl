@@ -32,6 +32,8 @@ Structure used to store convergence data for plotting.
         and max values.
 + `xlabel::String="time"`: label for the x axis
 + `ylabel::String="data"`: label for the y axis
++ `xaxis::Symbol`: scale for the x-axis, can be :identity, :ln, :log2, :log10, :asinh, :sqrt
++ `yaxis::Symbol`: scale for the y-axis, can be :identity, :ln, :log2, :log10, :asinh, :sqrt
 + `legend::Vector{String}=string.(1:N)`: legend for the different time series
 + `ylimits::Vector{Float64}=[-NaN64, NaN64]`: limits for the y axis
 """
@@ -41,6 +43,8 @@ struct TimeSeriesLogger{T,D}
     maxPoints::Int
     xlabel::String
     ylabel::String
+    xaxis::Symbol
+    yaxis::Symbol
     legend::Vector{String}
     ylimits::Vector{Float64}
     function TimeSeriesLogger{T,D}(
@@ -48,13 +52,15 @@ struct TimeSeriesLogger{T,D}
         maxPoints::Int=200,
         xlabel::String="time",
         ylabel::String="data",
+        xaxis::Symbol=:identity,
+        yaxis::Symbol=:identity,
         legend::Vector{String}=string.(1:N),
         ylimits::Vector{Float64}=[-NaN64, NaN64],
     ) where {T,D}
         time::ElasticVector{T} = ElasticVector{T}(undef, 0)
         data::ElasticMatrix{D} = ElasticMatrix{D}(undef, N, 0)
         return new{T,D}(time, data, maxPoints,
-            xlabel, ylabel, legend, ylimits)
+            xlabel, ylabel, xaxis, yaxis, legend, ylimits)
     end
 end
 
@@ -141,7 +147,9 @@ function plotLogger!(
             if any(isfinite.(me[:, d])) # exclude series with only nan and inf
                 Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
                     ylimits=logger.ylimits,
-                    xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
+                    xlabel=logger.xlabel, ylabel=logger.ylabel,
+                    xaxis=logger.xaxis, yaxis=logger.yaxis,
+                    labels=logger.legend[d],
                     markershape=:circle, markerstrokewidth=0, markercolor=color_series[d],
                     grid=true)
             end
@@ -151,7 +159,9 @@ function plotLogger!(
             if any(isfinite.(me[:, d]))
                 Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
                     ylimits=logger.ylimits,
-                    xlabel=logger.xlabel, ylabel=logger.ylabel, labels=logger.legend[d],
+                    xlabel=logger.xlabel, ylabel=logger.ylabel,
+                    xaxis=logger.xaxis, yaxis=logger.yaxis,
+                    labels=logger.legend[d],
                     grid=true)
             end
         end
@@ -159,7 +169,8 @@ function plotLogger!(
     for d in axes(me, 2)
         k = isfinite.(mn[:, d]) .&& isfinite.(mx[:, d]) # exclude nan and inf
         if any(k)
-            Plots.plot!(plt[subplot], t[k], mn[k, d], fillrange=mx[k, d], linecolor=color_series[d],
+            Plots.plot!(plt[subplot], t[k], mn[k, d], fillrange=mx[k, d],
+                linecolor=color_series[d],
                 c=color_series[d], fillalpha=0.1, linealpha=0,
                 label="")
         end
@@ -185,6 +196,11 @@ function subSample(
 ) where {T,D}
     time = logger.time
     data = logger.data
+    if !issorted(time)
+        k = sortperm(time)
+        time = time[k]
+        data = data[:, k]
+    end
     (nD, nPoints) = size(data)
     maxPoints = min(logger.maxPoints, nPoints)
     t = Vector{T}(undef, maxPoints)
