@@ -104,9 +104,14 @@ function saveBenchmark(
     gitCommitHash = ""
     gitCommitTime = ""
     try
-        gitCommitHash = readchomp(`$(git()) log -1 --format='%H'`)
-        gitCommitTime = readchomp(`$(git()) log -1 --format='%ai'`)
-        gitCommitTime = ZonedDateTime(gitCommitTime, "yyyy-mm-dd H:M:S z")
+        dir = splitdir(Base.active_project())[1]
+        arg1 = "--git-dir=$dir/.git"
+        arg2 = "--work-tree=$dir"
+        gitCommitHash = readchomp(`$(git()) $arg1 $arg2 log -1 --format='%H'`)
+        gitCommitTimeS::String = readchomp(`$(git()) $arg1 $arg2 log -1 --format='%ai'`)
+        gitCommitTime =
+            ZonedDateTime(gitCommitTime, "yyyy-mm-dd H:M:S z")
+        gitCommitTimeS = Dates.format(gitCommitTime, "yyyy-mm-dd H:M:S.s z")
     catch
         @printf("saveBenchmark: could not get git commit\n")
     end
@@ -181,7 +186,7 @@ function saveBenchmark(
         # making times more readable
         dfs = copy(df)
         dfs.benchmarkTime = Dates.format.(df.benchmarkTime, "yyyy-mm-dd H:M:S.s z")
-        dfs.gitCommitTime = Dates.format.(df.gitCommitTime, "yyyy-mm-dd H:M:S.s z")
+        #dfs.gitCommitTime = Dates.format.(df.gitCommitTime, "yyyy-mm-dd H:M:S.s z")
 
         @printf("saveBenchmark: saving \"%s\"\n", filename)
         CSV.write(filename, dfs)
