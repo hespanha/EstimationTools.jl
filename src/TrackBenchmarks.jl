@@ -89,7 +89,8 @@ function saveBenchmark(
         #display(df.benchmarkTime)
         #display(df.gitCommitTime)
         df.benchmarkTime = ZonedDateTime.(String.(df.benchmarkTime), "yyyy-mm-dd H:M:S.s z")
-        df.gitCommitTime = ZonedDateTime.(String.(df.gitCommitTime), "yyyy-mm-dd H:M:S.s z")
+        df.gitCommitTime = df.gitCommitTime
+        #df.gitCommitTime = ZonedDateTime.(String.(df.gitCommitTime), "yyyy-mm-dd H:M:S.s z")
         #display(df.benchmarkTime)
         #display(df.gitCommitTime)
 
@@ -109,11 +110,13 @@ function saveBenchmark(
         arg2 = "--work-tree=$dir"
         gitCommitHash = readchomp(`$(git()) $arg1 $arg2 log -1 --format='%H'`)
         gitCommitTimeS::String = readchomp(`$(git()) $arg1 $arg2 log -1 --format='%ai'`)
-        gitCommitTime =
-            ZonedDateTime(gitCommitTime, "yyyy-mm-dd H:M:S z")
-        gitCommitTimeS = Dates.format(gitCommitTime, "yyyy-mm-dd H:M:S.s z")
-    catch
-        @printf("saveBenchmark: could not get git commit\n")
+        gitCommitTimeDT =
+            ZonedDateTime(gitCommitTimeS, "yyyy-mm-dd H:M:S z")
+        @show gitCommitTime = Dates.format(gitCommitTimeDT, "yyyy-mm-dd H:M:S.s z")
+    catch me
+        display(me)
+        @printf("saveBenchmark: could not get git commit from \"%s\"\n", dir)
+        gitCommitTime = ""
     end
     ## Add current benchmark
     df1 = DataFrame(
