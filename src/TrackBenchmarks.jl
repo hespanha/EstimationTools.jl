@@ -37,7 +37,7 @@ struct Description
         return Description(""; varargs...)
     end
 end
-Base.isempty(d::Description) = isempty(d.name) && isempty(d.parNames)
+@inline Base.isempty(d::Description) = isempty(d.name) && isempty(d.parNames)
 function Base.show(io::IO, d::Description)
     if ~isempty(d)
         if ~isempty(d.name)
@@ -46,7 +46,11 @@ function Base.show(io::IO, d::Description)
             @printf(io, "Description:")
         end
         for i in 1:length(d.parNames)
-            @printf(io, "\n   %-25s: %s", d.parNames[i], string(d.parValues[i]))
+            str = string(d.parValues[i])
+            if length(str) > 80
+                str = str[1:35] * " … " * str[end-35:end]
+            end
+            @printf(io, "\n   %-25s: %s", d.parNames[i], str)
         end
     end
     return nothing
@@ -55,6 +59,21 @@ Base.convert(::Type{Dict}, d::Description) =
     Dict(Symbol(d.parNames[i]) => d.parValues[i] for i in eachindex(d.parNames, d.parValues))
 Base.convert(::Type{NamedTuple}, d::Description) =
     NamedTuple(Symbol(d.parNames[i]) => d.parValues[i] for i in eachindex(d.parNames, d.parValues))
+
+"""Get parameters in Description using `.parName`"""
+@inline function Base.getproperty(d::Description, sym::Symbol)
+    if sym === :name
+        return getfield(d, :name)
+    end
+    parNames = getfield(d, :parNames)
+    k = findfirst(parNames .== string(sym))
+    if isnothing(k)
+        return getfield(d, sym)
+    else
+        parValues = getfield(d, :parValues)
+        return parValues[k]
+    end
+end
 
 # TODO: pruning not implemented
 """
