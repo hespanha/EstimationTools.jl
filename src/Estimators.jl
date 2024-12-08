@@ -28,6 +28,16 @@ Estimator for scalar variables of:
 + std. dev.
 + confidence intervals for the mean
 + confidence intervals for the range
+
+# Available methods:
++ `add!(estimator::Estimator, value::Int) = add!(estimator, Float64(value))`
++ `EstimationTools.mean(estimator::Estimator)`
++ `(min,max)=Base.minmax(estimator::Estimator)`
++ `EstimationTools.std(estimator::Estimator, me::Float64)`
++ `EstimationTools.median(estimator::Estimator)`
++ `EstimationTools.meanCI(estimator::Estimator, percent::AbstractFloat)`
++ `(lower,upper)=EstimationTools.range(estimator::Estimator, percent::AbstractFloat)`
++ `Base.display(estimator::Estimator)`
 """
 mutable struct Estimator
     count::Int64
@@ -94,7 +104,7 @@ function meanCI(estimator::Estimator, percent::AbstractFloat)
 end
 
 """
-    (lower,upper)=range(estimator, percent)
+    (lower,upper)=range(estimator::Estimator, percent::AbstractFloat)
 
 Compute confidence interval for the values.
 """
