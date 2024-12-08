@@ -19,6 +19,14 @@ using EstimationTools
     d = Description("Qminmax.jl", linearSolver=:LDL, equalityTolerance=1e-8, muFactorAggressive=0.9)
     display(d)
     @test isempty(d) == false
+    @test length(d.parNames)==3
+    @test length(d.parValues)==3
+    @test haskey(d,:linearSolver)
+    @test haskey(d,"name")
+    @test haskey(d,"equalityTolerance")
+    @test !haskey(d,"xxx")
+    @test d.linearSolver== :LDL
+    @test d.equalityTolerance== 1e-8
 
     d = Description(solveTime=0.1, solveTimeWithoutPrint=0.05, nIter=4)
     display(d)
