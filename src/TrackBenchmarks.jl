@@ -21,8 +21,8 @@ Structure used to store the description of a problem, solver, etc.
    d=Description(solveTime=.1,solveTimeWithoutPrint=.05)
 """
 struct Description
-    name
-    parNames
+    name::String
+    parNames::Vector{String}
     parValues
     function Description(name::String; varargs...)
         parNames = [string(key) for (key, value) in varargs]
@@ -74,6 +74,8 @@ Base.convert(::Type{NamedTuple}, d::Description) =
         return parValues[k]
     end
 end
+"""Check if Description has a given parameter"""
+@inline Base.haskey(d::Description, sym::Symbol) = (sym == :name || sym in d.parNames)
 
 # TODO: pruning not implemented
 """
@@ -131,7 +133,7 @@ function saveBenchmark(
         gitCommitTimeS::String = readchomp(`$(git()) $arg1 $arg2 log -1 --format='%ai'`)
         gitCommitTimeDT =
             ZonedDateTime(gitCommitTimeS, "yyyy-mm-dd H:M:S z")
-        @show gitCommitTime = Dates.format(gitCommitTimeDT, "yyyy-mm-dd H:M:S.s z")
+        gitCommitTime = Dates.format(gitCommitTimeDT, "yyyy-mm-dd H:M:S.s z")
     catch me
         display(me)
         @printf("saveBenchmark: could not get git commit from \"%s\"\n", dir)
