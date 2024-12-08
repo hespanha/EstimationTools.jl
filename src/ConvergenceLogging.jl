@@ -151,7 +151,7 @@ function plotLogger!(
                     xaxis=logger.xaxis, yaxis=logger.yaxis,
                     labels=logger.legend[d],
                     markershape=:circle, markerstrokewidth=0, markercolor=color_series[d],
-                    grid=true)
+                    grid=true, legend=:topleft)
             end
         end
     else
@@ -162,7 +162,7 @@ function plotLogger!(
                     xlabel=logger.xlabel, ylabel=logger.ylabel,
                     xaxis=logger.xaxis, yaxis=logger.yaxis,
                     labels=logger.legend[d],
-                    grid=true)
+                    grid=true, legend=:topleft)
             end
         end
     end
