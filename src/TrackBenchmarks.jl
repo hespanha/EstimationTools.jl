@@ -62,8 +62,8 @@ Base.convert(::Type{NamedTuple}, d::Description) =
 
 """Get parameters in Description using `.parName`"""
 @inline function Base.getproperty(d::Description, sym::Symbol)
-    if sym === :name
-        return getfield(d, :name)
+    if sym == :name || sym == :parNames || sym == parValues
+        return getfield(d, sym)
     end
     parNames = getfield(d, :parNames)
     k = findfirst(parNames .== string(sym))
@@ -74,8 +74,10 @@ Base.convert(::Type{NamedTuple}, d::Description) =
         return parValues[k]
     end
 end
+@inline Base.getproperty(d::Description, sym::String) = getproperty(d, convert(Symbol, String))
 """Check if Description has a given parameter"""
-@inline Base.haskey(d::Description, sym::Symbol) = (sym == :name || sym in d.parNames)
+@inline Base.haskey(d::Description, sym::String) = (sym == "name" || sym in d.parNames)
+@inline Base.haskey(d::Description, sym::Symbol) = haskey(d, convert(String, sym))
 
 # TODO: pruning not implemented
 """
