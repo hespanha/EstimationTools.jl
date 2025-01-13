@@ -168,8 +168,8 @@ function plotLogger!(
                 Plots.plot!(plt[subplot], t[k], mn[k, d], fillrange=mx[k, d],
                     ylimits=ylimits,
                     xaxis=logger.xaxis, yaxis=logger.yaxis,
-                    linecolor=color_series[d],
-                    c=color_series[d], fillalpha=0.1, linealpha=0,
+                    linecolor=color_series[d], linewidth=0, linealpha=0.0,
+                    c=color_series[d], fillalpha=0.1,
                     label="")
             end
         end
@@ -179,7 +179,8 @@ function plotLogger!(
         if nPoints < 50
             for d in axes(me, 2)
                 if any(isfinite.(me[:, d])) # exclude series with only nan and inf
-                    Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
+                    Plots.plot!(plt[subplot], t, me[:, d],
+                        linecolor=color_series[d], linewidth=1, linealpha=1.0,
                         ylimits=ylimits,
                         xlabel=logger.xlabel, ylabel=logger.ylabel,
                         xaxis=logger.xaxis, yaxis=logger.yaxis,
@@ -191,7 +192,8 @@ function plotLogger!(
         else
             for d in axes(me, 2) # exclude series with only nan and inf
                 if any(isfinite.(me[:, d]))
-                    Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
+                    Plots.plot!(plt[subplot], t, me[:, d],
+                        linecolor=color_series[d], linewidth=1, linealpha=1.0,
                         ylimits=ylimits,
                         xlabel=logger.xlabel, ylabel=logger.ylabel,
                         xaxis=logger.xaxis, yaxis=logger.yaxis,
