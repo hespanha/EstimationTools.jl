@@ -78,6 +78,7 @@ end
 """Check if Description has a given parameter"""
 @inline Base.haskey(d::Description, sym::String) = (sym == "name" || sym in d.parNames)
 @inline Base.haskey(d::Description, sym::Symbol) = haskey(d, String(sym))
+@inline Base.keys(d::Description) = vcat("name", d.parNames)
 
 # TODO: pruning not implemented
 """
