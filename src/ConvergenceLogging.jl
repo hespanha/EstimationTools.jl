@@ -142,37 +142,63 @@ function plotLogger!(
     (nD, nPoints) = size(logger.data)
     color_series = palette(colors, nD)
     (t::Vector{T}, me::Matrix{Float64}, mn::Matrix{Float64}, mx::Matrix{Float64}) = subSample(logger)
-    if nPoints < 50
-        for d in axes(me, 2)
-            if any(isfinite.(me[:, d])) # exclude series with only nan and inf
-                Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
-                    ylimits=logger.ylimits,
-                    xlabel=logger.xlabel, ylabel=logger.ylabel,
-                    xaxis=logger.xaxis, yaxis=logger.yaxis,
-                    labels=logger.legend[d],
-                    markershape=:circle, markerstrokewidth=0, markercolor=color_series[d],
-                    grid=true, legend=:topleft)
+    ylimits = copy(logger.ylimits)
+    if true
+        # autoscale
+        mmx = maximum(m for m in mx if isfinite(m))
+        mmn = minimum(m for m in mn if isfinite(m))
+        if !isnan(mmx) && !isnan(mmn) && mmx > mmn
+            if isnan(ylimits[1])
+                ylimits[1] = mmn - 0.05 * (mmx - mmn)
+                if ylimits[1] <= 0 && logger.yaxis in [:ln, :log2, :log10]
+                    # log-scale cannot get negative
+                    ylimits[1] = mmn > 0 ? mmn : NaN
+                end
             end
-        end
-    else
-        for d in axes(me, 2) # exclude series with only nan and inf
-            if any(isfinite.(me[:, d]))
-                Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
-                    ylimits=logger.ylimits,
-                    xlabel=logger.xlabel, ylabel=logger.ylabel,
-                    xaxis=logger.xaxis, yaxis=logger.yaxis,
-                    labels=logger.legend[d],
-                    grid=true, legend=:topleft)
+            if isnan(ylimits[2])
+                ylimits[2] = mmx + 0.05 * (mmx - mmn)
             end
         end
     end
-    for d in axes(me, 2)
-        k = isfinite.(mn[:, d]) .&& isfinite.(mx[:, d]) # exclude nan and inf
-        if any(k)
-            Plots.plot!(plt[subplot], t[k], mn[k, d], fillrange=mx[k, d],
-                linecolor=color_series[d],
-                c=color_series[d], fillalpha=0.1, linealpha=0,
-                label="")
+    if true
+        # plot band from mn to mx
+        for d in axes(me, 2)
+            k = isfinite.(mn[:, d]) .&& isfinite.(mx[:, d]) # exclude nan and inf
+            if any(k)
+                Plots.plot!(plt[subplot], t[k], mn[k, d], fillrange=mx[k, d],
+                    ylimits=ylimits,
+                    xaxis=logger.xaxis, yaxis=logger.yaxis,
+                    linecolor=color_series[d],
+                    c=color_series[d], fillalpha=0.1, linealpha=0,
+                    label="")
+            end
+        end
+    end
+    if true
+        # plot mean
+        if nPoints < 50
+            for d in axes(me, 2)
+                if any(isfinite.(me[:, d])) # exclude series with only nan and inf
+                    Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
+                        ylimits=ylimits,
+                        xlabel=logger.xlabel, ylabel=logger.ylabel,
+                        xaxis=logger.xaxis, yaxis=logger.yaxis,
+                        labels=logger.legend[d],
+                        markershape=:circle, markerstrokewidth=0, markercolor=color_series[d],
+                        grid=true, legend=:topleft)
+                end
+            end
+        else
+            for d in axes(me, 2) # exclude series with only nan and inf
+                if any(isfinite.(me[:, d]))
+                    Plots.plot!(plt[subplot], t, me[:, d], linecolor=color_series[d],
+                        ylimits=ylimits,
+                        xlabel=logger.xlabel, ylabel=logger.ylabel,
+                        xaxis=logger.xaxis, yaxis=logger.yaxis,
+                        labels=logger.legend[d],
+                        grid=true, legend=:topleft)
+                end
+            end
         end
     end
     return plt
