@@ -17,7 +17,7 @@ Utility functions to help
 ### Scalar mean-variance estimation
 ###################################
 
-using PythonCall
+#using PythonCall
 
 import Statistics
 using LinearAlgebra
@@ -149,8 +149,9 @@ function actualVSforecast45deg(
     return (rmse, rmseLin, ab)
 end
 
+# FIXME: this function needs to be ported to Plots, rather than PythonPlot
 function actualVSforecast45deg!(
-    ax::PythonCall.Py,
+    ax,#::PythonCall.Py,
     actual::Vector{FloatM},
     forecast::Vector{FloatM};
     actualLabel::String="actual",
