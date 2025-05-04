@@ -145,9 +145,9 @@ function plotLogger!(
     ylimits = copy(logger.ylimits)
     if true
         # autoscale
-        mmx = maximum(m for m in mx if isfinite(m))
-        mmn = minimum(m for m in mn if isfinite(m))
-        if !isnan(mmx) && !isnan(mmn) && mmx > mmn
+        mmx = maximum(m for m in mx if isfinite(m); init=-Inf)
+        mmn = minimum(m for m in mn if isfinite(m); init=+Inf)
+        if !isnan(mmx) && !isnan(mmn) && mmx > mmn && isfinite(mmx) && isfinite(mmn)
             if isnan(ylimits[1])
                 ylimits[1] = mmn - 0.05 * (mmx - mmn)
                 if ylimits[1] <= 0 && logger.yaxis in [:ln, :log2, :log10]
