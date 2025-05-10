@@ -242,7 +242,8 @@ function subSample(
         for k in 1:nD
             iData = @view data[k, i:min(i + stp - 1, nPoints)]
             noNaN = Iterators.filter(!isnan, iData)
-            me[j, k] = mean(iData)
+            # do not use mean in case T is "small" and causes overflow
+            me[j, k] = sum(iData;init=zero(Float64))/length(iData)
             mn[j, k] = minimum(noNaN; init=+Inf64)
             mx[j, k] = maximum(noNaN; init=-Inf64)
         end
@@ -252,3 +253,4 @@ function subSample(
 end
 
 end
+
